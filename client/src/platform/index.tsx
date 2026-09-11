@@ -190,9 +190,13 @@ export const getCurrentUserProfile = async () => DEMO_USER
 
 // ---- scoped storage ----
 const PREFIX = 'demo:'
+/** First visit: the search page opens with this vehicle already looked up */
+const STORAGE_DEFAULTS: Record<string, string> = {
+  __global_vpi_selectedVehicleId: 'veh-101',
+}
 export const scopedStorage = {
   getItem: (k: string) => {
-    try { return localStorage.getItem(PREFIX + k) } catch { return null }
+    try { return localStorage.getItem(PREFIX + k) ?? STORAGE_DEFAULTS[k] ?? null } catch { return STORAGE_DEFAULTS[k] ?? null }
   },
   setItem: (k: string, v: string) => {
     try { localStorage.setItem(PREFIX + k, v) } catch { /* ignore */ }

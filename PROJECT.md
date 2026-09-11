@@ -30,9 +30,9 @@
 cd ~/Desktop/vehicle-parking-demo && npm run dev
 ```
 
-打开 http://localhost:4180。四个页面：`/`（Search，按车牌 / 按停车场两个 Tab）、`/apply`（New Request）、`/admin`（Approvals，`?tab=after-approval` 是第二个 Tab，右上历史图标是 Archive 抽屉）、`/approval-history`（My Requests，点 Header 的 "View as regular user" 切换）。
+打开 http://localhost:4180。四个页面：`/`（Search，按车牌 / 按停车场两个 Tab）、`/apply`（New Request）、`/admin`（Approvals，`?tab=after-approval` 是第二个 Tab，右上历史图标是 Archive 抽屉）、`/approval-history`（My Requests，导航里没有入口，直接输 URL）。
 
-演示数据存在浏览器 localStorage，顶部横幅的 **Reset data** 一键还原。搜索时输入 `DEMO` 或任意数字即可出候选。
+演示数据存在浏览器 localStorage，顶部横幅的 **Reset data** 一键还原。首次打开默认已查好 `DEMO 101`；搜索时输入 `DEMO` 或任意数字即可出候选。
 
 生产构建检查：
 

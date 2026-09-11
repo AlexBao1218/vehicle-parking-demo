@@ -26,7 +26,7 @@ See [PROJECT.md](PROJECT.md) for the owner handbook and the rules AI agents must
 | Admin "Full Details" on a vehicle | Partly redacted | Registration numbers, dates, prices, cost centres, vendors show the redaction bar |
 | Parking site address, floor plans, street photos | Redacted | Address is a bar; images are labelled schematics so the grid and lightbox still work |
 | Attachment upload on a request | Unavailable | The picker and previews work; files are not stored (explicit toast) |
-| Feishu identity, admin table, test-mode whitelist | Simulated | The visitor is a fixed demo admin; "View as regular user" toggles the applicant view |
+| Feishu identity, admin table, test-mode whitelist | Simulated | The visitor is a fixed demo admin; `/approval-history` shows the applicant view |
 
 Use **Reset data** in the top banner to restore the seeded state.
 

@@ -1,18 +1,15 @@
 import { NavLink } from 'react-router-dom';
-import { Eye, EyeOff } from 'lucide-react';
 import { useAdmin } from '@/contexts/AdminContext';
 import { PROGRAM_NAME } from '@/lib/brand';
 
 export default function Header() {
-  const { isAdmin, loading, viewAsUser, toggleViewAsUser } = useAdmin();
+  const { isAdmin, loading } = useAdmin();
 
   const thirdNav = loading
     ? null
-    : viewAsUser
-      ? { path: '/approval-history', label: 'My Requests' }
-      : isAdmin
-        ? { path: '/admin', label: 'Approvals' }
-        : { path: '/approval-history', label: 'My Requests' };
+    : isAdmin
+      ? { path: '/admin', label: 'Approvals' }
+      : { path: '/approval-history', label: 'My Requests' };
 
   return (
     <header className="sticky top-0 z-50 w-full bg-background/80 backdrop-blur-md border-b border-border/30">
@@ -59,29 +56,6 @@ export default function Header() {
               >
                 {thirdNav.label}
               </NavLink>
-            )}
-            {!loading && isAdmin && (
-              <button
-                type="button"
-                onClick={toggleViewAsUser}
-                className={
-                  viewAsUser
-                    ? 'ml-1 inline-flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-medium text-amber-700 bg-amber-50 hover:bg-amber-100 transition-colors'
-                    : 'ml-1 inline-flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-accent transition-colors'
-                }
-              >
-                {viewAsUser ? (
-                  <>
-                    <EyeOff className="size-3.5" />
-                    Viewing as regular user
-                  </>
-                ) : (
-                  <>
-                    <Eye className="size-3.5" />
-                    View as regular user
-                  </>
-                )}
-              </button>
             )}
         </nav>
       </div>

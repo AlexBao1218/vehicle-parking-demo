@@ -18,6 +18,8 @@ interface SearchBarSectionProps {
   keyword: string;
   onKeywordChange: (keyword: string) => void;
   containerRef: React.RefObject<HTMLDivElement | null>;
+  /** Plate of the vehicle currently shown; typing it again does not reopen the dropdown */
+  selectedLicense?: string;
 }
 
 const VEHICLE_PLUGIN_ID = 'vehicle_list_draft_readonly_query_3';
@@ -28,6 +30,7 @@ export default function SearchBarSection({
   keyword,
   onKeywordChange,
   containerRef,
+  selectedLicense,
 }: SearchBarSectionProps) {
   const [candidates, setCandidates] = useState<CandidateItem[]>([]);
   const [isSearching, setIsSearching] = useState(false);
@@ -94,7 +97,10 @@ export default function SearchBarSection({
   useEffect(() => {
     if (debounceRef.current) clearTimeout(debounceRef.current);
 
-    if (keyword.trim().length < 1) {
+    if (
+      keyword.trim().length < 1 ||
+      (selectedLicense && keyword.trim().toLowerCase() === selectedLicense.toLowerCase())
+    ) {
       setCandidates([]);
       setShowDropdown(false);
       setHasSearched(false);
@@ -108,7 +114,7 @@ export default function SearchBarSection({
     return () => {
       if (debounceRef.current) clearTimeout(debounceRef.current);
     };
-  }, [keyword, searchVehicles]);
+  }, [keyword, selectedLicense, searchVehicles]);
 
   const handleSelect = (item: CandidateItem) => {
     onKeywordChange(item.vicLicense);

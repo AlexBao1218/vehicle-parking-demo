@@ -201,6 +201,7 @@ export default function VehicleSearchPage() {
               keyword={searchKeyword}
               onKeywordChange={setSearchKeyword}
               containerRef={searchContainerRef}
+              selectedLicense={selectedVehicle?.vicLicense}
             />
           </div>
           ) : (
