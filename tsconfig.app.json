@@ -1,0 +1,25 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "jsx": "react-jsx",
+    "strict": true,
+    "skipLibCheck": true,
+    "noEmit": true,
+    "isolatedModules": true,
+    "resolveJsonModule": true,
+    "allowImportingTsExtensions": true,
+    "baseUrl": "./",
+    "paths": {
+      "@shared/*": ["shared/*"],
+      "@client/*": ["client/*"],
+      "@/*": ["client/src/*"],
+      "@lark-apaas/client-toolkit": ["client/src/platform/index.tsx"],
+      "@lark-apaas/client-toolkit/*": ["client/src/platform/index.tsx"]
+    }
+  },
+  "include": ["client/**/*", "shared/**/*"],
+  "exclude": ["node_modules", "dist", "reference"]
+}
