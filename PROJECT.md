@@ -16,7 +16,7 @@
 | 位置 | 地址 |
 |---|---|
 | 本地 | `~/Desktop/vehicle-parking-demo` |
-| GitHub | 尚未推送，见下面"发布" |
+| GitHub | https://github.com/AlexBao1218/vehicle-parking-demo（目前 **private**，确认没问题后再改 public） |
 | 线上 | 还没部署，见下面"部署" |
 | 原始导出包 | `~/Downloads/vehicle info.zip`（含真实 Base token、表 ID、测试车牌，不要上传到任何地方） |
 
@@ -53,11 +53,11 @@ SOP 里的三档：① 合成聚合 + 记录级遮蔽 ② 通用占位符 ③ �
 
 ### 发布
 
-```bash
-cd ~/Desktop/vehicle-parking-demo && gh repo create vehicle-parking-demo --private --source=. --push
-```
+已推到 private 仓库。自己过一遍后改 public：
 
-先 private，自己过一遍再改 public。
+```bash
+cd ~/Desktop/vehicle-parking-demo && gh repo edit --visibility public --accept-visibility-change-consequences
+```
 
 ### 部署到 Vercel
 
@@ -87,7 +87,7 @@ case study 里有几处 `[TO FILL]`（车队规模、使用人数、每月申请
 
 ### 还没做的事
 
-- GitHub 推送（private）
+- GitHub 仓库切 public
 - Vercel 部署和子域名
 - zijun.cloud 项目页
 - README 截图
