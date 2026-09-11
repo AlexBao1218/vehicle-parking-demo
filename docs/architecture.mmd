@@ -1,0 +1,13 @@
+flowchart LR
+  subgraph Feishu tenant
+    U[Staff / Transport admins] -->|browser| C[React client<br/>Search · New Request · Approvals · My Requests]
+    C -->|capabilityClient| P1[(Bitable plugin<br/>Fleet List DRAFT · read)]
+    C -->|capabilityClient| P2[(Bitable plugin<br/>Parking Location & Map · read)]
+    C -->|axiosForBackend /api| S[NestJS API<br/>change-requests · approval · parking-locations]
+    S --> DB[(PostgreSQL<br/>change_requests · logbook · administrators)]
+    S -->|CapabilityService| P1
+    S -->|write + read-back| P3[(Bitable plugin<br/>Fleet List DRAFT · batch update)]
+    S -->|dataloom storage| F[(File bucket<br/>attachments)]
+  end
+  A[Excel Fleet List master<br/>+ Logbook macro] -. TSV copy from<br/>Fleet Record Updates .-> S
+  T[Transport team offline actions] -. Follow-up list .-> S

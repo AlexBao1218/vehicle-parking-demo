@@ -1,0 +1,56 @@
+erDiagram
+  CHANGE_REQUESTS {
+    uuid id PK
+    varchar change_type "id from shared/change-types.ts"
+    varchar vehicle_id "Bitable record id"
+    varchar vehicle_license
+    varchar log_from
+    varchar log_to
+    timestamptz effective_date
+    text remark
+    varchar status "草稿 | 待审批 | 已批准 | 已拒絕"
+    jsonb attachments
+    user_profile approver
+    timestamptz approval_time
+    text approval_comment
+    timestamptz vehicle_synced_at "null until written back"
+    jsonb edit_history
+    timestamptz follow_up_completed_at
+    user_profile _created_by
+  }
+  LOGBOOK {
+    uuid id PK
+    timestamptz log_date
+    varchar vic_license
+    varchar change_type "excelLogbookType"
+    varchar log_from
+    varchar log_to
+    text remark
+    varchar sync_status "未同步 | 已同步"
+    uuid source_request_id FK
+  }
+  ADMINISTRATORS {
+    user_profile user_id PK
+  }
+  FLEET_LIST_DRAFT {
+    string record_id PK
+    string VicLicense
+    string Status
+    string Department
+    string Section
+    string Company
+    string Transport_Coordinator
+    string Parking_Location "text link to site name"
+  }
+  PARKING_LOCATION_MAP {
+    string record_id PK
+    string Location
+    attachment Diagram
+    attachment Street_view
+    select Height_limit
+    multiselect Allowed_types
+    select EV_charging
+  }
+  CHANGE_REQUESTS ||--o{ LOGBOOK : "approval generates"
+  CHANGE_REQUESTS }o--|| FLEET_LIST_DRAFT : "writes field back"
+  FLEET_LIST_DRAFT }o--o| PARKING_LOCATION_MAP : "Parking Location name"
