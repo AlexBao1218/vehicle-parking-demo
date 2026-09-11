@@ -73,20 +73,170 @@ export const DEMO_USERS: Record<string, string> = {
 // so the image grid, hover state and lightbox still behave as in production.
 // ---------------------------------------------------------------------------
 
-export function placeholderImage(kind: 'map' | 'street', label: string): string {
-  const title = kind === 'map' ? 'Parking map' : 'Street view'
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="960" height="540" viewBox="0 0 960 540">
-  <rect width="960" height="540" fill="#f3f4f6"/>
-  <g stroke="#d1d5db" stroke-width="2" fill="none">
-    <rect x="80" y="80" width="800" height="380" rx="8"/>
-    ${kind === 'map'
-      ? '<path d="M80 270 H880 M480 80 V460"/><rect x="120" y="120" width="120" height="60" rx="4"/><rect x="260" y="120" width="120" height="60" rx="4"/><rect x="400" y="120" width="60" height="60" rx="4"/><rect x="520" y="120" width="120" height="60" rx="4"/><rect x="660" y="120" width="120" height="60" rx="4"/><rect x="120" y="360" width="120" height="60" rx="4"/><rect x="260" y="360" width="120" height="60" rx="4"/><rect x="520" y="360" width="120" height="60" rx="4"/><rect x="660" y="360" width="120" height="60" rx="4"/>'
-      : '<path d="M80 400 L880 400 M200 400 L200 180 L420 180 L420 400 M520 400 L520 220 L760 220 L760 400"/><circle cx="640" cy="150" r="30"/>'}
-  </g>
-  <text x="480" y="262" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="26" fill="#6b7280">${title} · ${label}</text>
-  <text x="480" y="298" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="18" fill="#9ca3af">Site image withheld in public demo</text>
-</svg>`
+const FONT = "Inter, 'Helvetica Neue', Arial, sans-serif"
+
+function svgDataUri(svg: string): string {
   return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`
+}
+
+/** Deterministic pseudo-random in [0, 1) from a seed and an index */
+function noise(seed: number, i: number): number {
+  const x = Math.sin(seed * 9301 + i * 49297) * 233280
+  return x - Math.floor(x)
+}
+
+function carShape(x: number, y: number, up: boolean): string {
+  // 36 x 62 top-down car; windscreen towards the aisle
+  const win = up ? y + 40 : y + 10
+  return `<g>
+    <rect x="${x}" y="${y}" width="36" height="62" rx="9" fill="#3b6fe0" opacity="0.9"/>
+    <rect x="${x + 5}" y="${win}" width="26" height="12" rx="3" fill="#dbe7ff" opacity="0.9"/>
+    <rect x="${x + 5}" y="${up ? y + 12 : y + 40}" width="26" height="9" rx="3" fill="#2a56b8" opacity="0.7"/>
+  </g>`
+}
+
+function mapSvg(label: string, seed: number): string {
+  const bays = 7 + (seed % 2) // 7 or 8 bays per row
+  const bayW = 64
+  const gap = 8
+  const rowW = bays * (bayW + gap) - gap
+  const x0 = 200 + Math.round((560 - rowW) / 2)
+  const parts: string[] = []
+  const rows: Array<[number, boolean, string]> = [[72, true, 'A'], [368, false, 'B']]
+  for (const [y, up, letter] of rows) {
+    for (let i = 0; i < bays; i += 1) {
+      const x = x0 + i * (bayW + gap)
+      const occupied = noise(seed, i + (up ? 0 : 50)) > 0.42
+      parts.push(`<rect x="${x}" y="${y}" width="${bayW}" height="100" rx="3" fill="#f6f8fb" stroke="#c9d2de" stroke-width="1.5"/>`)
+      parts.push(`<text x="${x + bayW / 2}" y="${up ? y + 96 : y + 14}" text-anchor="middle" font-family="${FONT}" font-size="10.5" font-weight="600" fill="#8a96a6" letter-spacing="0.5">${letter}${String(i + 1).padStart(2, '0')}</text>`)
+      if (occupied) parts.push(carShape(x + 14, up ? y + 8 : y + 30, up))
+    }
+    // pillars between every second bay
+    for (let i = 0; i <= bays; i += 2) {
+      const x = x0 + i * (bayW + gap) - gap / 2 - 5
+      parts.push(`<rect x="${x}" y="${up ? y + 104 : y - 14}" width="10" height="10" fill="#4b5563"/>`)
+    }
+  }
+  const aisleY = 270
+  const arrowsLeft = seed % 2 === 0
+  const arrow = (x: number) => arrowsLeft
+    ? `<path d="M${x + 22} ${aisleY - 6} L${x} ${aisleY} L${x + 22} ${aisleY + 6}" fill="none" stroke="#9aa6b8" stroke-width="2"/>`
+    : `<path d="M${x} ${aisleY - 6} L${x + 22} ${aisleY} L${x} ${aisleY + 6}" fill="none" stroke="#9aa6b8" stroke-width="2"/>`
+
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="960" height="540" viewBox="0 0 960 540">
+  <defs>
+    <pattern id="hatch" width="10" height="10" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+      <line x1="0" y1="0" x2="0" y2="10" stroke="#b9c3d1" stroke-width="3"/>
+    </pattern>
+  </defs>
+  <rect width="960" height="540" fill="#f3f5f8"/>
+  <!-- building shell -->
+  <rect x="40" y="52" width="880" height="436" rx="12" fill="#ffffff" stroke="#b9c3d1" stroke-width="3"/>
+  <!-- ramp -->
+  <rect x="62" y="190" width="110" height="160" rx="6" fill="url(#hatch)" stroke="#b9c3d1" stroke-width="1.5"/>
+  <rect x="62" y="190" width="110" height="160" rx="6" fill="#ffffff" opacity="0.55"/>
+  <text x="117" y="262" text-anchor="middle" font-family="${FONT}" font-size="12" font-weight="600" fill="#5b6675" letter-spacing="1.2">RAMP</text>
+  <path d="M104 300 L117 284 L130 300" fill="none" stroke="#5b6675" stroke-width="2"/>
+  <path d="M104 226 L117 242 L130 226" fill="none" stroke="#5b6675" stroke-width="2"/>
+  <!-- lift / stairs core -->
+  <rect x="790" y="196" width="112" height="148" rx="6" fill="#e6ebf2" stroke="#b9c3d1" stroke-width="1.5"/>
+  <text x="846" y="262" text-anchor="middle" font-family="${FONT}" font-size="12" font-weight="600" fill="#5b6675" letter-spacing="1.2">LIFT</text>
+  <text x="846" y="282" text-anchor="middle" font-family="${FONT}" font-size="11" fill="#8a96a6" letter-spacing="1">STAIRS</text>
+  <!-- drive aisle -->
+  <line x1="180" y1="${aisleY}" x2="780" y2="${aisleY}" stroke="#c9d2de" stroke-width="2" stroke-dasharray="16 12"/>
+  ${arrow(300)}${arrow(480)}${arrow(660)}
+  ${parts.join('\n  ')}
+  <!-- title block -->
+  <text x="56" y="34" font-family="${FONT}" font-size="17" font-weight="700" fill="#1f2937">${label}</text>
+  <!-- north arrow -->
+  <g transform="translate(884 26)">
+    <path d="M0 -12 L6 8 L0 4 L-6 8 Z" fill="#1f2937"/>
+    <text x="0" y="24" text-anchor="middle" font-family="${FONT}" font-size="10" font-weight="700" fill="#1f2937">N</text>
+  </g>
+  <!-- legend -->
+  <g transform="translate(56 508)" font-family="${FONT}" font-size="11" fill="#6b7686">
+    <rect x="0" y="-9" width="14" height="10" rx="2" fill="#f6f8fb" stroke="#c9d2de"/>
+    <text x="20" y="0">Bay</text>
+    <rect x="56" y="-9" width="14" height="10" rx="3" fill="#3b6fe0" opacity="0.9"/>
+    <text x="76" y="0">Parked</text>
+    <rect x="130" y="-8" width="8" height="8" fill="#4b5563"/>
+    <text x="144" y="0">Pillar</text>
+  </g>
+  <text x="904" y="510" text-anchor="end" font-family="${FONT}" font-size="11" fill="#9aa6b8">Schematic · original site plan withheld in public demo</text>
+</svg>`
+}
+
+function streetSvg(label: string, seed: number, heightLimit: number | null): string {
+  const floors = 2 + (seed % 3) // 2..4 storeys above the car park entrance
+  const windows: string[] = []
+  const top = 350 - floors * 54
+  for (let f = 0; f < floors; f += 1) {
+    for (let c = 0; c < 8; c += 1) {
+      const lit = noise(seed, f * 10 + c) > 0.6
+      windows.push(`<rect x="${214 + c * 66}" y="${top + 14 + f * 54}" width="38" height="30" rx="2" fill="${lit ? '#dfe9fb' : '#e8edf3'}" stroke="#c2ccd8"/>`)
+    }
+  }
+  const treeAt = (x: number, h: number) => `<g>
+    <rect x="${x - 4}" y="${400 - h}" width="8" height="${h}" fill="#8b7355"/>
+    <circle cx="${x}" cy="${400 - h - 6}" r="30" fill="#a9c4a5"/>
+    <circle cx="${x - 18}" cy="${400 - h + 8}" r="22" fill="#98b894"/>
+    <circle cx="${x + 18}" cy="${400 - h + 8}" r="22" fill="#98b894"/>
+  </g>`
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="960" height="540" viewBox="0 0 960 540">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#eef3fa"/>
+      <stop offset="1" stop-color="#f8fafc"/>
+    </linearGradient>
+  </defs>
+  <rect width="960" height="540" fill="url(#sky)"/>
+  <!-- road and pavement -->
+  <rect x="0" y="400" width="960" height="140" fill="#d6dde6"/>
+  <rect x="0" y="400" width="960" height="14" fill="#c2ccd8"/>
+  <line x1="0" y1="476" x2="960" y2="476" stroke="#f3f5f8" stroke-width="3" stroke-dasharray="40 26"/>
+  <!-- building -->
+  <rect x="180" y="${top - 16}" width="600" height="${416 - top}" fill="#f1f4f8" stroke="#b9c3d1" stroke-width="2.5"/>
+  <rect x="180" y="${top - 16}" width="600" height="10" fill="#c2ccd8"/>
+  ${windows.join('\n  ')}
+  <!-- car park entrance -->
+  <rect x="400" y="290" width="200" height="110" fill="#3a4250"/>
+  <rect x="400" y="290" width="200" height="110" fill="none" stroke="#b9c3d1" stroke-width="2.5"/>
+  <rect x="404" y="294" width="192" height="10" fill="#52607a"/>
+  <rect x="460" y="238" width="80" height="40" rx="6" fill="#2a56b8"/>
+  <text x="500" y="268" text-anchor="middle" font-family="${FONT}" font-size="30" font-weight="700" fill="#ffffff">P</text>
+  <!-- barrier -->
+  <rect x="404" y="352" width="10" height="48" fill="#5b6675"/>
+  <line x1="410" y1="360" x2="580" y2="348" stroke="#f0b429" stroke-width="7" stroke-linecap="round"/>
+  <line x1="410" y1="360" x2="580" y2="348" stroke="#ffffff" stroke-width="7" stroke-linecap="butt" stroke-dasharray="18 18"/>
+  ${heightLimit != null ? `<!-- height limit sign -->
+  <circle cx="640" cy="330" r="24" fill="#ffffff" stroke="#d64545" stroke-width="5"/>
+  <text x="640" y="336" text-anchor="middle" font-family="${FONT}" font-size="14" font-weight="700" fill="#1f2937">${heightLimit.toFixed(1)}m</text>
+  <rect x="637" y="354" width="6" height="46" fill="#5b6675"/>` : ''}
+  <!-- lamp -->
+  <rect x="120" y="250" width="6" height="150" fill="#5b6675"/>
+  <circle cx="123" cy="246" r="9" fill="#f7e6a6" stroke="#5b6675" stroke-width="2"/>
+  ${treeAt(72, 70)}
+  ${treeAt(870, 84)}
+  <!-- car -->
+  <g transform="translate(${150 + (seed % 3) * 40} 424)">
+    <rect x="0" y="12" width="150" height="34" rx="10" fill="#6b7686"/>
+    <path d="M30 12 L48 -12 L112 -12 L128 12 Z" fill="#7c8797"/>
+    <rect x="52" y="-8" width="52" height="18" rx="3" fill="#dbe7ff"/>
+    <circle cx="36" cy="48" r="12" fill="#1f2937"/>
+    <circle cx="116" cy="48" r="12" fill="#1f2937"/>
+  </g>
+  <text x="32" y="38" font-family="${FONT}" font-size="17" font-weight="700" fill="#1f2937">${label}</text>
+  <text x="928" y="518" text-anchor="end" font-family="${FONT}" font-size="11" fill="#7c8797">Illustration · original street photo withheld in public demo</text>
+</svg>`
+}
+
+export function placeholderImage(
+  kind: 'map' | 'street',
+  label: string,
+  seed = 0,
+  heightLimit: number | null = null,
+): string {
+  return svgDataUri(kind === 'map' ? mapSvg(label, seed) : streetSvg(label, seed, heightLimit))
 }
 
 // ---------------------------------------------------------------------------
@@ -116,13 +266,13 @@ export const DEMO_PARKING_LOCATIONS: DemoParkingLocation[] = Array.from({ length
     address: REDACTED,
     heightLimitStatus: HEIGHT[i][0],
     heightLimitMeters: HEIGHT[i][1],
-    streetViewUrls: i % 2 === 0 ? [placeholderImage('street', name)] : [],
+    streetViewUrls: i % 2 === 0 ? [placeholderImage('street', name, i, HEIGHT[i][1])] : [],
     carLift: i % 5 === 2 ? '是' : i % 5 === 4 ? null : '否',
     parkingRack: i % 7 === 3 ? '是' : '否',
     allowedVehicleTypes: TYPES[i],
     chargingEquipment: CHARGING[i][0],
     chargingEquipmentType: CHARGING[i][1],
-    diagramUrls: Array.from({ length: diagrams }, (_, d) => placeholderImage('map', `${name} · Level ${d + 1}`)),
+    diagramUrls: Array.from({ length: diagrams }, (_, d) => placeholderImage('map', `${name} · Level ${d + 1}`, i * 3 + d)),
   }
 })
 

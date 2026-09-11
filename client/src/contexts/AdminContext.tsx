@@ -17,7 +17,7 @@ const AdminContext = createContext<AdminContextValue>({
   loading: true,
   viewAsUser: false,
   toggleViewAsUser: () => {},
-  syncMode: 'test',
+  syncMode: 'production',
   testVehicleLicenses: [],
 });
 
@@ -25,7 +25,7 @@ export function AdminProvider({ children }: { children: ReactNode }) {
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
   const [viewAsUser, setViewAsUser] = useState(false);
-  const [syncMode, setSyncMode] = useState<'test' | 'production'>('test');
+  const [syncMode, setSyncMode] = useState<'test' | 'production'>('production');
   const [testVehicleLicenses, setTestVehicleLicenses] = useState<string[]>([]);
 
   const toggleViewAsUser = useCallback(() => {
@@ -39,7 +39,7 @@ export function AdminProvider({ children }: { children: ReactNode }) {
         const res = await axiosForBackend.get<ApiResponse<AdminCheckResponse>>('/api/auth/admin-check');
         if (!cancelled) {
           setIsAdmin(res.data.data?.isAdmin ?? false);
-          setSyncMode(res.data.data?.syncMode ?? 'test');
+          setSyncMode(res.data.data?.syncMode ?? 'production');
           setTestVehicleLicenses(res.data.data?.testVehicleLicenses ?? []);
         }
       } catch (err) {
