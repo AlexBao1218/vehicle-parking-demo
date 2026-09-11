@@ -11,7 +11,7 @@
 import { REDACTED } from '@/lib/brand'
 
 // EXPORTS: DemoVehicle, DemoParkingLocation, DEMO_VEHICLES, DEMO_PARKING_LOCATIONS,
-//          DEMO_USERS, DEMO_USER_ID, VEHICLE_FIELD_KEYS, placeholderImage
+//          DEMO_USERS, DEMO_USER_ID, VEHICLE_FIELD_KEYS, streetViewImage, parkingMapImage, hasParkingMap
 
 export interface DemoVehicle {
   id: string
@@ -86,16 +86,15 @@ function noise(seed: number, i: number): number {
 }
 
 function carShape(x: number, y: number, up: boolean): string {
-  // 36 x 62 top-down car; windscreen towards the aisle
+  // 36 x 62 top-down car; windscreen towards the aisle, rear plain
   const win = up ? y + 40 : y + 10
   return `<g>
     <rect x="${x}" y="${y}" width="36" height="62" rx="9" fill="#3b6fe0" opacity="0.9"/>
     <rect x="${x + 5}" y="${win}" width="26" height="12" rx="3" fill="#dbe7ff" opacity="0.9"/>
-    <rect x="${x + 5}" y="${up ? y + 12 : y + 40}" width="26" height="9" rx="3" fill="#2a56b8" opacity="0.7"/>
   </g>`
 }
 
-function mapSvg(label: string, seed: number): string {
+function mapSvg(label: string, seed: number, plates: string[]): string {
   const bays = 7 + (seed % 2) // 7 or 8 bays per row
   const bayW = 64
   const gap = 8
@@ -103,20 +102,34 @@ function mapSvg(label: string, seed: number): string {
   const x0 = 200 + Math.round((560 - rowW) / 2)
   const parts: string[] = []
   const rows: Array<[number, boolean, string]> = [[72, true, 'A'], [368, false, 'B']]
-  for (const [y, up, letter] of rows) {
+  // spread the parked vehicles over the bays deterministically
+  const slots = new Map<number, string>()
+  const total = bays * 2
+  const sorted = [...plates].sort()
+  sorted.forEach((plate, k) => {
+    let slot = (k * 5 + seed * 3) % total
+    while (slots.has(slot)) slot = (slot + 1) % total
+    slots.set(slot, plate)
+  })
+  rows.forEach(([y, up, letter], rowIdx) => {
     for (let i = 0; i < bays; i += 1) {
       const x = x0 + i * (bayW + gap)
-      const occupied = noise(seed, i + (up ? 0 : 50)) > 0.42
-      parts.push(`<rect x="${x}" y="${y}" width="${bayW}" height="100" rx="3" fill="#f6f8fb" stroke="#c9d2de" stroke-width="1.5"/>`)
-      parts.push(`<text x="${x + bayW / 2}" y="${up ? y + 96 : y + 14}" text-anchor="middle" font-family="${FONT}" font-size="10.5" font-weight="600" fill="#8a96a6" letter-spacing="0.5">${letter}${String(i + 1).padStart(2, '0')}</text>`)
-      if (occupied) parts.push(carShape(x + 14, up ? y + 8 : y + 30, up))
+      const plate = slots.get(rowIdx * bays + i)
+      const labelY = up ? y + 96 : y + 14
+      parts.push(`<rect x="${x}" y="${y}" width="${bayW}" height="100" rx="3" fill="${plate ? '#eef3fd' : '#f6f8fb'}" stroke="${plate ? '#9db5ea' : '#c9d2de'}" stroke-width="1.5"/>`)
+      if (plate) {
+        parts.push(carShape(x + 14, up ? y + 8 : y + 30, up))
+        parts.push(`<text x="${x + bayW / 2}" y="${labelY}" text-anchor="middle" font-family="${FONT}" font-size="9.5" font-weight="700" fill="#2a56b8" letter-spacing="0.3">${plate}</text>`)
+      } else {
+        parts.push(`<text x="${x + bayW / 2}" y="${labelY}" text-anchor="middle" font-family="${FONT}" font-size="10.5" font-weight="600" fill="#8a96a6" letter-spacing="0.5">${letter}${String(i + 1).padStart(2, '0')}</text>`)
+      }
     }
     // pillars between every second bay
     for (let i = 0; i <= bays; i += 2) {
       const x = x0 + i * (bayW + gap) - gap / 2 - 5
       parts.push(`<rect x="${x}" y="${up ? y + 104 : y - 14}" width="10" height="10" fill="#4b5563"/>`)
     }
-  }
+  })
   const aisleY = 270
   const arrowsLeft = seed % 2 === 0
   const arrow = (x: number) => arrowsLeft
@@ -156,11 +169,11 @@ function mapSvg(label: string, seed: number): string {
   <!-- legend -->
   <g transform="translate(56 508)" font-family="${FONT}" font-size="11" fill="#6b7686">
     <rect x="0" y="-9" width="14" height="10" rx="2" fill="#f6f8fb" stroke="#c9d2de"/>
-    <text x="20" y="0">Bay</text>
-    <rect x="56" y="-9" width="14" height="10" rx="3" fill="#3b6fe0" opacity="0.9"/>
-    <text x="76" y="0">Parked</text>
-    <rect x="130" y="-8" width="8" height="8" fill="#4b5563"/>
-    <text x="144" y="0">Pillar</text>
+    <text x="20" y="0">Vacant bay</text>
+    <rect x="88" y="-9" width="14" height="10" rx="3" fill="#3b6fe0" opacity="0.9"/>
+    <text x="108" y="0">Fleet vehicle</text>
+    <rect x="186" y="-8" width="8" height="8" fill="#4b5563"/>
+    <text x="200" y="0">Pillar</text>
   </g>
   <text x="904" y="510" text-anchor="end" font-family="${FONT}" font-size="11" fill="#9aa6b8">Schematic · original site plan withheld in public demo</text>
 </svg>`
@@ -230,13 +243,21 @@ function streetSvg(label: string, seed: number, heightLimit: number | null): str
 </svg>`
 }
 
-export function placeholderImage(
-  kind: 'map' | 'street',
-  label: string,
-  seed = 0,
-  heightLimit: number | null = null,
-): string {
-  return svgDataUri(kind === 'map' ? mapSvg(label, seed) : streetSvg(label, seed, heightLimit))
+/** Street elevation for a site (static) */
+export function streetViewImage(label: string, seed = 0, heightLimit: number | null = null): string {
+  return svgDataUri(streetSvg(label, seed, heightLimit))
+}
+
+/** Floor plan for a site; `plates` are the fleet vehicles currently parked there */
+export function parkingMapImage(label: string, seed: number, plates: string[]): string {
+  return svgDataUri(mapSvg(label, seed, plates))
+}
+
+/** Sites without a plan on file keep the empty state of the image grid */
+const SITES_WITHOUT_MAP = new Set(['loc-08'])
+
+export function hasParkingMap(siteId: string): boolean {
+  return !SITES_WITHOUT_MAP.has(siteId)
 }
 
 // ---------------------------------------------------------------------------
@@ -259,20 +280,20 @@ const TYPES: string[][] = [
 export const DEMO_PARKING_LOCATIONS: DemoParkingLocation[] = Array.from({ length: 10 }, (_, i) => {
   const n = String(i + 1).padStart(2, '0')
   const name = `Parking Site ${n}`
-  const diagrams = i % 4 === 3 ? 0 : i % 3 === 0 ? 2 : 1
   return {
     id: `loc-${n}`,
     name,
     address: REDACTED,
     heightLimitStatus: HEIGHT[i][0],
     heightLimitMeters: HEIGHT[i][1],
-    streetViewUrls: i % 2 === 0 ? [placeholderImage('street', name, i, HEIGHT[i][1])] : [],
+    streetViewUrls: i % 2 === 0 ? [streetViewImage(name, i, HEIGHT[i][1])] : [],
     carLift: i % 5 === 2 ? '是' : i % 5 === 4 ? null : '否',
     parkingRack: i % 7 === 3 ? '是' : '否',
     allowedVehicleTypes: TYPES[i],
     chargingEquipment: CHARGING[i][0],
     chargingEquipmentType: CHARGING[i][1],
-    diagramUrls: Array.from({ length: diagrams }, (_, d) => placeholderImage('map', `${name} · Level ${d + 1}`, i * 3 + d)),
+    /** Filled at request time from the vehicles parked at the site (see platform/) */
+    diagramUrls: [],
   }
 })
 

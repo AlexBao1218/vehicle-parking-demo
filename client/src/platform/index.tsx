@@ -15,7 +15,7 @@ import { TooltipProvider } from '@/components/ui/tooltip'
 import type { ApiResponse } from '@shared/api.interface'
 import { DEMO_PARKING_LOCATIONS, DEMO_USER_ID, DEMO_USERS, type DemoVehicle } from '@/data/demo-dataset'
 import { getStore, saveStore } from './store'
-import { handleRequest, type HttpMethod } from './backend'
+import { diagramUrlsFor, handleRequest, type HttpMethod } from './backend'
 
 // ---- logger ----
 const tag = '[demo]'
@@ -69,7 +69,7 @@ function parkingRecord(p: (typeof DEMO_PARKING_LOCATIONS)[number]): PluginRecord
     id: p.id,
     record: {
       Location: { text: p.name },
-      Diagram: p.diagramUrls.map((url, i) => ({ name: `diagram-${i + 1}.svg`, size: 0, tmpUrl: url, type: 'image/svg+xml' })),
+      Diagram: diagramUrlsFor(p).map((url, i) => ({ name: `diagram-${i + 1}.svg`, size: 0, tmpUrl: url, type: 'image/svg+xml' })),
     },
   }
 }

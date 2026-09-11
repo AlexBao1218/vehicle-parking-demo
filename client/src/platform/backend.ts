@@ -18,7 +18,7 @@ import type {
 } from '@shared/api.interface'
 import { CHANGE_TYPES, getChangeType, isSubmittableChangeType } from '@shared/change-types'
 import { formatLogbookDate } from '@shared/format-logbook-date'
-import { DEMO_PARKING_LOCATIONS, DEMO_USER_ID, DEMO_USERS, VEHICLE_FIELD_KEYS, type DemoVehicle } from '@/data/demo-dataset'
+import { DEMO_PARKING_LOCATIONS, DEMO_USER_ID, DEMO_USERS, VEHICLE_FIELD_KEYS, hasParkingMap, parkingMapImage, type DemoParkingLocation, type DemoVehicle } from '@/data/demo-dataset'
 import { getStore, saveStore } from './store'
 import type { StoredRequest } from './seed'
 
@@ -568,6 +568,20 @@ function normalize(s: string): string {
   return s.replace(/\s+/g, ' ').trim().toLowerCase()
 }
 
+/** Plates of the fleet vehicles currently recorded at a site */
+export function platesAt(site: DemoParkingLocation): string[] {
+  return getStore().vehicles
+    .filter((v) => normalize(v.parkingLocationName) === normalize(site.name))
+    .map((v) => v.vicLicense)
+}
+
+/** Floor plan drawn from the live fleet record, or none for sites without a plan */
+export function diagramUrlsFor(site: DemoParkingLocation): string[] {
+  if (!hasParkingMap(site.id)) return []
+  const seed = Number(site.id.replace(/\D/g, '')) || 0
+  return [parkingMapImage(site.name, seed, platesAt(site))]
+}
+
 function listParkingLocations(): ParkingLocationSummary[] {
   return [...DEMO_PARKING_LOCATIONS]
     .sort((a, b) => a.name.localeCompare(b.name))
@@ -577,7 +591,7 @@ function listParkingLocations(): ParkingLocationSummary[] {
 function getParkingLocationDetail(id: string): ParkingLocationDetail {
   const p = DEMO_PARKING_LOCATIONS.find((s) => s.id === id)
   if (!p) throw new Error('Parking location not found')
-  return { ...p }
+  return { ...p, diagramUrls: diagramUrlsFor(p) }
 }
 
 function getParkedVehicles(id: string): { items: ParkedVehicleSummary[]; total: number } {
