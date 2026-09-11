@@ -131,14 +131,14 @@ const ApprovalDetailPanel: React.FC<ApprovalDetailPanelProps> = ({
       </div>
 
       {/* Body */}
-      <div className="flex-1 min-h-0 overflow-y-auto p-4 space-y-4 text-[13px]">
+      <div className="flex-1 min-h-0 overflow-y-auto px-6 py-5 space-y-6 text-[13px]">
         {/* Meta */}
-        <div className="space-y-1.5">
+        <div className="space-y-3">
           <FieldRow label="Change Type" value={changeLabel} />
         </div>
 
         {/* Change details */}
-        <div className="space-y-1.5">
+        <div className="space-y-3">
           {writesLogbook && (
             <>
               <FieldRow
@@ -210,7 +210,7 @@ const ApprovalDetailPanel: React.FC<ApprovalDetailPanelProps> = ({
 
         {/* Approval info */}
         {!isPending && request.approvalTime && (
-          <div className="rounded-md border border-border bg-accent/40 p-3 space-y-1 text-[12px] text-muted-foreground">
+          <div className="rounded-md border border-border bg-accent/40 p-4 space-y-1.5 text-[12px] text-muted-foreground">
             {request.approverName && (
               <div>
                 <span className="font-medium">Approved by: </span>
@@ -302,8 +302,8 @@ function FieldRow({
   muted?: boolean;
 }) {
   return (
-    <div className="flex items-start gap-1.5 min-w-0">
-      <span className="w-[104px] shrink-0 text-[12px] text-muted-foreground">
+    <div className="flex items-start gap-3 min-w-0 leading-relaxed">
+      <span className="w-[112px] shrink-0 text-[12px] text-muted-foreground">
         {label}
       </span>
       {icon && (
