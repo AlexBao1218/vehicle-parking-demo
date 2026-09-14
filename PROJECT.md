@@ -32,7 +32,7 @@ cd ~/Desktop/vehicle-parking-demo && npm run dev
 
 打开 http://localhost:4180。四个页面：`/`（Search，按车牌 / 按停车场两个 Tab）、`/apply`（New Request）、`/admin`（Approvals，`?tab=after-approval` 是第二个 Tab，右上历史图标是 Archive 抽屉）、`/approval-history`（My Requests，导航里没有入口，直接输 URL）。
 
-演示数据存在浏览器 localStorage，顶部横幅的 **Reset data** 一键还原。首次打开默认已查好 `DEMO 101`；搜索时输入 `DEMO` 或任意数字即可出候选。
+演示数据存在浏览器 localStorage，导航栏右端的 **Reset data** 一键还原。首次打开默认已查好 `DEMO 101`；搜索时输入 `DEMO` 或任意数字即可出候选。
 
 生产构建检查：
 
@@ -75,7 +75,7 @@ cd ~/Desktop/vehicle-parking-demo && vercel --prod
 
 ### 放进 zijun.cloud
 
-1. 在 `content/projects/_index/en.json` 和 `zh.json` 的 `projects` 数组加一条，slug 用 `vehicle-parking`（demo 横幅的 "How it was built" 已经指向 `https://zijun.cloud/en/projects/vehicle-parking`，slug 不要改）。
+1. 在 `content/projects/_index/en.json` 和 `zh.json` 的 `projects` 数组加一条，slug 用 `vehicle-parking`（`lib/brand.ts` 的 `CASE_STUDY_URL` 指向 `https://zijun.cloud/en/projects/vehicle-parking`，slug 不要改）。
 2. 新建 `content/projects/vehicle-parking/en.json` 和 `zh.json`。素材直接取：
    - 卡片文案、标签、亮点：本仓库 `docs/portfolio-summary.md`
    - 正文各节：`docs/case-study.md`（英文）和 `docs/zh/case-study.md`（中文）
@@ -127,7 +127,7 @@ client/src/
   platform/store.ts       localStorage persistence (key vpi-demo:store), resetDemoData()
   data/demo-dataset.ts    36 vehicles, 10 sites, placeholder SVG images, REDACTED fields
   lib/brand.ts            PROGRAM_NAME, REDACTED, NOT_AVAILABLE_LABEL, CASE_STUDY_URL
-  components/             Layout (DemoBanner + Header), Redacted, DemoBanner, ui/
+  components/             Layout (Header), Header (nav + Reset data), Redacted, ui/
   pages/                  original page code; only edits: brand name, attachment notice,
                           Sensitive rendering, cleaned extra-field keys
 shared/                   api.interface.ts, change-types.ts (the registry), format-logbook-date.ts

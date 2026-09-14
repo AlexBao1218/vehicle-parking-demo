@@ -13,6 +13,7 @@ export const REDACTED = '[redacted]'
 export const REDACTED_LABEL = 'Redacted for public demo'
 export const NOT_AVAILABLE_LABEL = 'Not available in public demo'
 export const SYNTHETIC_LABEL = 'Synthetic data'
+/** Canonical case-study page; kept as the demo's provenance link (no in-app banner) */
 export const CASE_STUDY_URL = 'https://zijun.cloud/en/projects/vehicle-parking'
 
 export const isRedacted = (v: unknown): boolean => v === REDACTED

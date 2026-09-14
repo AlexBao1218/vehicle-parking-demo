@@ -28,7 +28,7 @@ See [PROJECT.md](PROJECT.md) for the owner handbook and the rules AI agents must
 | Attachment upload on a request | Unavailable | The picker and previews work; files are not stored (explicit toast) |
 | Feishu identity, admin table, test-mode whitelist | Simulated | The visitor is a fixed demo admin; `/approval-history` shows the applicant view |
 
-Use **Reset data** in the top banner to restore the seeded state.
+Use **Reset data** at the right end of the header to restore the seeded state.
 
 ## Tech stack
 
@@ -64,7 +64,7 @@ client/
     │   ├── demo-dataset.ts    # synthetic vehicles and parking sites
     │   ├── labels.ts          # display-layer English mapping over stored contract values
     │   └── vehicle.ts         # Bitable record → whitelist mapping
-    ├── components/            # Layout, Header, DemoBanner, Redacted, ui/
+    ├── components/            # Layout, Header (has Reset data), Redacted, ui/
     ├── pages/                 # VehicleSearchPage, ApplicationPage, AdminPage, ApprovalHistoryPage
     └── lib/brand.ts           # naming + disclosure constants
 shared/                        # api.interface.ts, change-types.ts (registry), format-logbook-date.ts

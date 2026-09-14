@@ -1,6 +1,8 @@
 import { NavLink } from 'react-router-dom';
+import { RotateCcw } from 'lucide-react';
 import { useAdmin } from '@/contexts/AdminContext';
 import { PROGRAM_NAME } from '@/lib/brand';
+import { resetDemoData } from '@/platform/store';
 
 export default function Header() {
   const { isAdmin, loading } = useAdmin();
@@ -57,6 +59,20 @@ export default function Header() {
                 {thirdNav.label}
               </NavLink>
             )}
+            <span aria-hidden className="mx-1 h-4 w-px bg-border/60" />
+            <button
+              type="button"
+              onClick={() => {
+                resetDemoData();
+                window.location.assign('/');
+              }}
+              title="Restore the seeded demo data"
+              className="inline-flex items-center gap-1.5 rounded-md px-2 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+            >
+              <RotateCcw className="size-3.5" />
+              <span className="hidden sm:inline">Reset data</span>
+              <span className="sr-only sm:hidden">Reset data</span>
+            </button>
         </nav>
       </div>
     </header>
