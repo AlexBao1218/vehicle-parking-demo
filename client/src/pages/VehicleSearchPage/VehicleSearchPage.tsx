@@ -1,3 +1,4 @@
+import { usePortfolioReady } from '@/lib/usePortfolioReady';
 import { useState, useCallback, useEffect, useRef, type ChangeEvent } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MapPin, Search, Loader2 } from 'lucide-react';
@@ -38,6 +39,8 @@ export default function VehicleSearchPage() {
   const { isAdmin, viewAsUser } = useAdmin();
   const showDetail = isAdmin && !viewAsUser;
 
+  const [restorePending, setRestorePending] = useState(true);
+  usePortfolioReady(!restorePending && !isLoading && !resultLoading && !detailLoading);
   const handleSearchChange = (e: ChangeEvent<HTMLInputElement>) => {
     setSearchKeyword(e.target.value);
   };
@@ -113,7 +116,7 @@ export default function VehicleSearchPage() {
   // Restore cached vehicle on page load
   useEffect(() => {
     const cachedId = scopedStorage.getItem(STORAGE_KEY_VEHICLE_ID);
-    if (!cachedId) return;
+    if (!cachedId) { setRestorePending(false); return; }
 
     let cancelled = false;
     (async () => {
@@ -124,9 +127,11 @@ export default function VehicleSearchPage() {
         if (cancelled || !result.record) return;
         const vehicle = mapVehicleRecord({ id: cachedId, record: result.record });
         setSearchKeyword(vehicle.vicLicense);
-        handleVehicleSelect(vehicle);
+        await handleVehicleSelect(vehicle);
       } catch (err) {
         logger.error('Restore cached vehicle failed:', String(err));
+      } finally {
+        if (!cancelled) setRestorePending(false);
       }
     })();
     return () => { cancelled = true; };
