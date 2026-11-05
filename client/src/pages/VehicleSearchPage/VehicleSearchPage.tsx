@@ -290,5 +290,5 @@ function VehicleSearchContent() {
 }
 export default function VehicleSearchPage(){
  const [category,setCategory]=useState('vehicle');
- return <><div className="mx-auto max-w-7xl px-4 pt-8 md:px-6"><Tabs value={category} onValueChange={setCategory}><TabsList className="h-11 w-full max-w-md rounded-xl"><TabsTrigger value="vehicle">Vehicle</TabsTrigger><TabsTrigger value="uber">Uber</TabsTrigger></TabsList></Tabs></div>{category==='vehicle'?<VehicleSearchContent/>:<div className="mx-auto max-w-7xl px-4 py-8 md:px-6"><UberSearch/></div>}</>;
+ return <><div className="mx-auto max-w-7xl px-4 pt-8 md:px-6"><Tabs value={category} onValueChange={setCategory}><TabsList className="h-11 w-full max-w-md mx-auto rounded-xl p-1"><TabsTrigger value="vehicle">Vehicle</TabsTrigger><TabsTrigger value="uber">Uber</TabsTrigger></TabsList></Tabs></div>{category==='vehicle'?<VehicleSearchContent/>:<div className="mx-auto max-w-7xl px-4 py-8 md:px-6"><UberSearch/></div>}</>;
 }
