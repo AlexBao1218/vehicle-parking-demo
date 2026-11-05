@@ -52,7 +52,7 @@ export interface SubmitDraftsRequest {
 // ===== 審批 =====
 
 export interface EditHistoryChange {
-  field: 'changeType' | 'logFrom' | 'logTo' | 'effectiveDate' | 'remark';
+  field: `uber.${number}` | 'changeType' | 'logFrom' | 'logTo' | 'effectiveDate' | 'remark';
   from: string;
   to: string;
 }

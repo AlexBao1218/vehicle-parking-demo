@@ -1,3 +1,4 @@
+import {UberSearch} from '@/preview/Uber';
 import { usePortfolioReady } from '@/lib/usePortfolioReady';
 import { useState, useCallback, useEffect, useRef, type ChangeEvent } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -22,7 +23,7 @@ const STORAGE_KEY_VEHICLE_ID = '__global_vpi_selectedVehicleId';
 
 type SearchMode = 'license' | 'parking';
 
-export default function VehicleSearchPage() {
+function VehicleSearchContent() {
   const [searchMode, setSearchMode] = useState<SearchMode>('license');
   const [selectedVehicle, setSelectedVehicle] = useState<IVehicleRecord | null>(null);
   const [parkingLocation, setParkingLocation] = useState<IParkingLocation | null>(null);
@@ -286,4 +287,8 @@ export default function VehicleSearchPage() {
       />
     </>
   );
+}
+export default function VehicleSearchPage(){
+ const [category,setCategory]=useState('vehicle');
+ return <><div className="mx-auto max-w-7xl px-4 pt-8 md:px-6"><Tabs value={category} onValueChange={setCategory}><TabsList className="h-11 w-full max-w-md rounded-xl"><TabsTrigger value="vehicle">Vehicle</TabsTrigger><TabsTrigger value="uber">Uber</TabsTrigger></TabsList></Tabs></div>{category==='vehicle'?<VehicleSearchContent/>:<div className="mx-auto max-w-7xl px-4 py-8 md:px-6"><UberSearch/></div>}</>;
 }

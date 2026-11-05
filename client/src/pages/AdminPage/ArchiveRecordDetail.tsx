@@ -1,3 +1,5 @@
+import { AdminNote, UberRequestDetails } from '@/preview/Uber';
+import type { Request } from '@/preview/store';
 import type { ReactNode } from 'react';
 import type {
   ApprovalRecord,
@@ -38,8 +40,12 @@ export default function ArchiveRecordDetail({
   const history: EditHistoryEntry[] = record.editHistory ?? [];
   const attachments: AttachmentInfo[] = record.attachments ?? [];
 
+  if((record as Request).uber)return <div className="space-y-4 p-4"><UberRequestDetails request={record as Request}/>{record.approvalComment&&<p className="text-sm">Comment: {record.approvalComment}</p>}<AdminNote requestId={record.id}/></div>;
+
   return (
     <div className="grid gap-4 bg-muted/40 p-4 md:grid-cols-2">
+      <div className="md:col-span-2"><AdminNote requestId={record.id}/></div>
+      {(record as Request).uber && <div className="md:col-span-2"><UberRequestDetails request={record as Request}/></div>}
       <DetailField label={isOffline ? 'Description' : 'Remark'} full>
         {record.remark ? (
           <p className="whitespace-pre-wrap break-words">{record.remark}</p>

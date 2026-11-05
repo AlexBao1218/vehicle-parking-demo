@@ -1,3 +1,5 @@
+import { AdminNote, UberRequestDetails } from '@/preview/Uber';
+import type { Request } from '@/preview/store';
 import React, { useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -76,6 +78,7 @@ const ApprovalDetailPanel: React.FC<ApprovalDetailPanelProps> = ({
   }
 
   const isPending = request.status === STATUS_PENDING;
+  const uber = (request as Request).uber;
   const badge = STATUS_BADGE[request.status] ?? { variant: 'outline' as const };
   const changeLabel =
     getChangeType(request.changeType)?.label ?? request.changeType;
@@ -90,7 +93,7 @@ const ApprovalDetailPanel: React.FC<ApprovalDetailPanelProps> = ({
       <div className="flex h-[41px] shrink-0 items-center justify-between gap-2 border-b border-border px-4">
         <div className="flex items-center gap-2 min-w-0">
           <span className="text-[14.5px] font-semibold text-foreground truncate">
-            {request.vehicleLicense}
+            {uber?'Request details':request.vehicleLicense}
           </span>
           <Badge variant={badge.variant} className="text-[11.5px]">
             {getStatusLabel(request.status)}
@@ -128,17 +131,19 @@ const ApprovalDetailPanel: React.FC<ApprovalDetailPanelProps> = ({
             </Tooltip>
           )}
         </div>
+        <AdminNote key={request.id} requestId={request.id} mode="action"/>
       </div>
 
       {/* Body */}
-      <div className="flex-1 min-h-0 overflow-y-auto px-6 py-5 space-y-6 text-[13px]">
+      <div className="flex-1 min-h-0 overflow-y-auto p-4 space-y-4 text-[13px]">
+        {uber ? <UberRequestDetails request={request as Request}/> : <>
         {/* Meta */}
-        <div className="space-y-3">
+        <div className="space-y-1.5">
           <FieldRow label="Change Type" value={changeLabel} />
         </div>
 
         {/* Change details */}
-        <div className="space-y-3">
+        <div className="space-y-1.5">
           {writesLogbook && (
             <>
               <FieldRow
@@ -208,9 +213,10 @@ const ApprovalDetailPanel: React.FC<ApprovalDetailPanelProps> = ({
           />
         </div>
 
+        </>}
         {/* Approval info */}
         {!isPending && request.approvalTime && (
-          <div className="rounded-md border border-border bg-accent/40 p-4 space-y-1.5 text-[12px] text-muted-foreground">
+          <div className="rounded-md border border-border bg-accent/40 p-3 space-y-1 text-[12px] text-muted-foreground">
             {request.approverName && (
               <div>
                 <span className="font-medium">Approved by: </span>
@@ -231,6 +237,7 @@ const ApprovalDetailPanel: React.FC<ApprovalDetailPanelProps> = ({
         )}
       </div>
 
+      <AdminNote requestId={request.id} mode="saved"/>
       {/* Actions */}
       {isPending && (
         <div className="flex h-[52px] shrink-0 items-center justify-end gap-2 border-t border-border bg-accent/50 px-4">
@@ -302,8 +309,8 @@ function FieldRow({
   muted?: boolean;
 }) {
   return (
-    <div className="flex items-start gap-3 min-w-0 leading-relaxed">
-      <span className="w-[112px] shrink-0 text-[12px] text-muted-foreground">
+    <div className="flex items-start gap-1.5 min-w-0">
+      <span className="w-[104px] shrink-0 text-[12px] text-muted-foreground">
         {label}
       </span>
       {icon && (

@@ -1,3 +1,4 @@
+import {getState as getUberState,mutate as mutateUber,decide as decideUber,publicRequest} from '@/preview/store';
 /**
  * In-browser replacement for the NestJS backend.
  *
@@ -621,7 +622,7 @@ function delay(): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, LATENCY_MS))
 }
 
-export async function handleRequest(
+async function handleFleetRequest(
   method: HttpMethod,
   url: string,
   body?: unknown,
@@ -711,4 +712,26 @@ export async function handleRequest(
   }
 
   throw new Error(`No demo handler for ${method.toUpperCase()} ${path}`)
+}
+
+/** Combine independent demo modules without replacing the vehicle lifecycle. */
+export async function handleRequest(method:HttpMethod,url:string,body?:unknown,options?:RequestOptions):Promise<ApiResponse<unknown>|undefined>{
+ const path=url.split('?')[0], p=options?.params??{};
+ const match=path.match(/^\/api\/approval\/(approve|reject)\/([^/]+)$/);
+ if(method==='post'&&match&&getUberState().requests.some(r=>r.id===decodeURIComponent(match[2]))){
+  const id=decodeURIComponent(match[2]);const comment=String((body as {approvalComment?:string})?.approvalComment??'');
+  if(match[1]==='reject'&&!comment.trim())throw Error('A comment is required when rejecting');
+  mutateUber(s=>decideUber(s,id,match[1]==='approve',comment));return ok({id,status:getUberState().requests.find(r=>r.id===id)!.status});
+ }
+ if(method==='get'&&path==='/api/approval/my-requests')return ok([...listMyRequests(DEMO_USER_ID),...getUberState().requests.map(publicRequest)].sort((a,b)=>b.applyTime.localeCompare(a.applyTime)));
+ if(method==='get'&&path==='/api/approval/requests'){
+  const items=[...listRequests(p.status).items,...getUberState().requests.filter(r=>!p.status||p.status==='全部'||r.status===p.status)].sort((a,b)=>b.applyTime.localeCompare(a.applyTime));return ok({items,total:items.length});
+ }
+ if(method==='get'&&path==='/api/approval/archive'){
+  const first=listArchive({...p,page:'1',pageSize:'100'});const fleet=[...first.items];
+  for(let page=2;fleet.length<first.total;page++)fleet.push(...listArchive({...p,page:String(page),pageSize:'100'}).items);
+  const extra=getUberState().requests.filter(r=>(!p.status||p.status==='全部'||r.status===p.status)&&(!p.vehicleLicense||r.vehicleLicense.toLowerCase().includes(p.vehicleLicense.trim().toLowerCase()))&&(!p.changeType||r.changeType===p.changeType)&&(!p.category||p.category==='Uber')&&(!p.applicant||p.applicant===DEMO_USER_ID)&&(!p.dateFrom||new Date(r.applyTime)>=new Date(p.dateFrom+'T00:00:00'))&&(!p.dateTo||new Date(r.applyTime)<=new Date(p.dateTo+'T23:59:59.999')));
+  const items=[...fleet,...extra].sort((a,b)=>b.applyTime.localeCompare(a.applyTime));const page=Math.max(1,parseInt(p.page)||1),pageSize=Math.min(100,Math.max(1,parseInt(p.pageSize)||20));return ok({items:items.slice((page-1)*pageSize,page*pageSize),total:items.length,page,pageSize});
+ }
+ return handleFleetRequest(method,url,body,options);
 }

@@ -1,7 +1,10 @@
+import UberEditDialog from '@/preview/UberEditDialog';
+import type { Request } from '@/preview/store';
+import { UberTables } from '@/preview/Uber';
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { toast } from 'sonner';
-import { logger } from '@lark-apaas/client-toolkit/logger';
+import { logger } from '@/preview/local-toolkit';
 import {
   Tabs,
   TabsList,
@@ -174,6 +177,7 @@ export default function AdminPage() {
         toast.success('Approved.');
         // Approval may generate new pending sync entries / follow-up items
         fetchSyncStatus();
+        fetchLogbook();
         fetchFollowUps();
       } catch (err: unknown) {
         const msg =
@@ -184,7 +188,7 @@ export default function AdminPage() {
         setApproveTarget(null);
       }
     },
-    [approveTarget, requests, selectedId, fetchSyncStatus, fetchFollowUps],
+    [approveTarget, requests, selectedId, fetchSyncStatus, fetchLogbook, fetchFollowUps],
   );
 
   const handleReject = useCallback(
@@ -249,7 +253,7 @@ export default function AdminPage() {
   return (
     <div className="mx-auto max-w-7xl px-4 py-6 md:px-6">
       {/* Sync status bar */}
-      <div className="mb-4">
+      {(syncStatusLoading || (syncStatus?.pendingCount ?? 0) > 0 || syncStatus?.lastSyncedAt) && <div className="mb-4">
         <SyncStatusBar
           pendingCount={syncStatus?.pendingCount ?? 0}
           lastSyncedAt={syncStatus?.lastSyncedAt ?? null}
@@ -257,7 +261,7 @@ export default function AdminPage() {
           onReview={() => setDrawerOpen(true)}
           onRefresh={fetchSyncStatus}
         />
-      </div>
+      </div>}
 
       {/* Tabs */}
       <Tabs value={tab} onValueChange={handleTabChange}>
@@ -326,6 +330,7 @@ export default function AdminPage() {
               loading={followUpsLoading}
               onMarkComplete={handleMarkFollowUpsComplete}
             />
+            <UberTables />
           </div>
         </TabsContent>
       </Tabs>
@@ -359,14 +364,14 @@ export default function AdminPage() {
         onConfirm={handleReject}
         loading={actionLoading}
       />
-      <EditRequestDialog
+      {(editTarget as Request | null)?.uber ? <UberEditDialog key={editTarget!.id} record={editTarget as Request} onClose={()=>setEditTarget(null)} onSaved={handleEditSaved}/> : <EditRequestDialog
         open={!!editTarget}
         onOpenChange={(open: boolean) => {
           if (!open) setEditTarget(null);
         }}
         record={editTarget}
         onSaved={handleEditSaved}
-      />
+      />}
     </div>
   );
 }

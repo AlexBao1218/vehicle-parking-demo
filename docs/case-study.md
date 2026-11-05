@@ -72,3 +72,10 @@ More in `docs/engineering-notes.md`.
 ## 8. What the public demo changes
 
 Same page code, two replacements: the Feishu Spark runtime becomes a local shim (`client/src/platform/index.tsx`) that serves the capability calls from a synthetic fleet, and the NestJS API becomes an in-browser module (`client/src/platform/backend.ts`) that mirrors the services' rules over `localStorage`. Plates, sites, departments and people are placeholders; identifying and financial columns show a redaction bar; site images are labelled schematics; attachment upload states that it is unavailable. The original backend modules are kept in `reference/server/` as documentation.
+
+
+## Account workflow extension / 账户申请流程
+
+The demo combines the existing interactive parking map and vehicle lifecycle with spreadsheet-style account requests. Each row becomes an independent approval. Original fields remain visible to the demo administrator; changed rows show old → new values. Representative and notification recipient are independent of the account holder. All examples are generic, browser-local fixtures; no Feishu message is sent. Business impact: [TO FILL].
+
+保留原停车地图、车场资料和车辆流程，加入表格批量申请。每行独立审批；管理员查看完整原信息，只在变化行展示旧值 → 新值。代表申请人、通知人和账户持有人分别记录。所有数据均为通用示例，飞书消息仅预览，不实际发送。业务成效：[TO FILL]。

@@ -75,3 +75,7 @@ docs/                          # case study EN/ZH, diagrams, portfolio blurb, en
 ## Original production setup
 
 The app ran inside a Feishu tenant on Spark: a React client, a NestJS API with PostgreSQL (Drizzle ORM) for requests, logbook and administrators, and Bitable plugin instances for the fleet list and parking-site tables. Approval wrote the new value back to the fleet table through a write plugin with a read-back check and a plate-based record-id re-resolution, generated a logbook row for the Excel master, and left card re-issues and "Other" requests in a follow-up queue. A test mode restricted approvals to whitelisted plates during rollout. Details in [`docs/case-study.md`](docs/case-study.md).
+
+## Uber account requests
+
+The Uber tab adds Excel-style batch entry with separate New account and Change information modes. Each row is reviewed independently. Representative, notification recipient and account holder are distinct fields. Use `example.user@example.com` in Company A to explore an existing account; all account values are generic examples. Feishu messages are previews only. The original parking diagrams, details, vehicle list and fleet lifecycle remain available under Vehicle.

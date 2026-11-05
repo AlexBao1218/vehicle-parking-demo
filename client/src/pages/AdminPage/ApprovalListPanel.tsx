@@ -1,4 +1,6 @@
-import React from 'react';
+import {requestTitle,requestType} from '@/preview/request-display';
+import React, {useState,useMemo,useEffect} from 'react';
+import type {Request} from '@/preview/store';
 import type { ApprovalRecord } from '@shared/api.interface';
 import { getChangeType } from '@shared/change-types';
 
@@ -15,28 +17,26 @@ const ApprovalListPanel: React.FC<ApprovalListPanelProps> = ({
   onSelect,
   loading = false,
 }) => {
+  const [filter,setFilter]=useState('Uber');
+  const visible=useMemo(()=>requests.filter(r=>(filter==='Uber')===!!(r as Request).uber),[requests,filter]);
+  useEffect(()=>{if(!loading&&!visible.some(r=>r.id===selectedId)&&selectedId!==(visible[0]?.id??''))onSelect(visible[0]?.id??'');},[visible,selectedId,onSelect,loading]);
   return (
     <div className="flex h-full flex-col overflow-hidden">
       <div className="flex h-[41px] shrink-0 items-center gap-1.5 border-b border-border px-3">
-        <span className="text-[12px] font-medium text-muted-foreground">
-          Pending
-        </span>
-        <span className="font-mono text-[11.5px] text-muted-foreground">
-          {requests.length}
-        </span>
+        <div role="group" aria-label="Filter request category" className="flex w-full gap-1">{['Vehicle','Uber'].map(category=><button key={category} type="button" aria-pressed={filter===category} onClick={()=>setFilter(category)} className={`flex-1 rounded-md px-2 py-1 text-[12px] font-medium ${filter===category?'bg-primary/10 text-primary':'text-muted-foreground hover:bg-accent'}`}>{category}</button>)}</div>
       </div>
       <div className="flex-1 min-h-0 overflow-y-auto">
         {loading ? (
           <div className="py-10 text-center text-[12px] text-muted-foreground">
             Loading…
           </div>
-        ) : requests.length === 0 ? (
+        ) : visible.length === 0 ? (
           <div className="py-10 text-center text-[12px] text-muted-foreground">
-            No pending requests.
+            No pending requests in this category.
           </div>
         ) : (
           <ul className="py-1">
-            {requests.map((r) => {
+            {visible.map((r) => {
               const selected = r.id === selectedId;
               const changeLabel =
                 getChangeType(r.changeType)?.label ?? r.changeType;
@@ -53,10 +53,10 @@ const ApprovalListPanel: React.FC<ApprovalListPanelProps> = ({
                     ].join(' ')}
                   >
                     <span className="text-[13px] font-medium text-foreground">
-                      {r.vehicleLicense}
+                      {requestTitle(r as Request)}
                     </span>
                     <span className="text-[12px] text-muted-foreground">
-                      {changeLabel}
+                      {(r as Request).uber?requestType(r as Request):changeLabel}
                     </span>
                   </button>
                 </li>

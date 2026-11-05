@@ -3,7 +3,7 @@ import { AdminProvider } from "@/contexts/AdminContext";
 import { Layout } from "@/components/Layout";
 import NotFoundPage from "@/pages/NotFoundPage/NotFoundPage";
 import VehicleSearchPage from "@/pages/VehicleSearchPage/VehicleSearchPage";
-import ApplicationPage from "@/pages/ApplicationPage/ApplicationPage";
+import ApplicationPage from "@/preview/RequestPage";
 import AdminPage from "@/pages/AdminPage/AdminPage";
 import ApprovalHistoryPage from "@/pages/ApprovalHistoryPage/ApprovalHistoryPage";
 

@@ -1,3 +1,6 @@
+import {requestTitle,requestType} from '@/preview/request-display';
+import { UberRequestDetails } from '@/preview/Uber';
+import type { Request } from '@/preview/store';
 import { useEffect, useState, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import * as approvalApi from '@/api/approval';
@@ -8,7 +11,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
-import { logger } from '@lark-apaas/client-toolkit/logger';
+import { logger } from '@/preview/local-toolkit';
 import type { ApprovalRecord, EditHistoryEntry } from '@shared/api.interface';
 import { formatEditChange } from '@/utils/edit-history';
 import { formatDateDay, formatDateTime } from '@/utils/date-format';
@@ -67,7 +70,7 @@ function RecordCard({ record }: { record: ApprovalRecord }) {
               {/* 車牌 + 狀態徽章 */}
               <div className="flex items-center gap-3">
                 <span className="truncate text-lg font-bold text-foreground">
-                  {record.vehicleLicense}
+                  {requestTitle(record as Request)}
                 </span>
                 <StatusBadge status={record.status} />
                 {editHistory.length > 0 && (
@@ -79,10 +82,11 @@ function RecordCard({ record }: { record: ApprovalRecord }) {
 
               {/* 變更類型 */}
               <div className="text-sm text-muted-foreground">
-                <span className="font-medium text-foreground">Change Type: </span>
-                {getChangeType(record.changeType)?.label ?? record.changeType}
+                {!(record as Request).uber&&<span className="font-medium text-foreground">Change Type: </span>}
+                {(record as Request).uber?requestType(record as Request):(getChangeType(record.changeType)?.label ?? record.changeType)}
               </div>
 
+              {(record as Request).uber ? <UberRequestDetails request={record as Request} publicView/> : <>
               {/* Log-From → Log-To */}
               <div className="text-sm text-muted-foreground">
                 <span className="font-medium text-foreground">Log-From: </span>
@@ -98,8 +102,9 @@ function RecordCard({ record }: { record: ApprovalRecord }) {
                 {formatDateDay(record.effectiveDate)}
               </div>
 
+              </>}
               {/* 備註 */}
-              {record.remark && (
+              {!(record as Request).uber && record.remark && (
                 <div className="text-sm text-muted-foreground">
                   <span className="font-medium text-foreground">Remark: </span>
                   {record.remark}
@@ -108,20 +113,20 @@ function RecordCard({ record }: { record: ApprovalRecord }) {
             </div>
 
             {/* 右側：審批資訊 */}
-            <div className="space-y-2.5 sm:w-56 sm:text-right">
-              <div className="text-sm">
+            {(record.approvalComment||record.approvalTime)&&<div className="space-y-2.5 sm:w-56 sm:text-right">
+              {record.approvalComment&&<div className="text-sm">
                 <span className="text-muted-foreground">Comment: </span>
                 <span className="text-foreground">
-                  {record.approvalComment || '—'}
+                  {record.approvalComment}
                 </span>
-              </div>
-              <div className="text-sm">
+              </div>}
+              {record.approvalTime&&<div className="text-sm">
                 <span className="text-muted-foreground">Approval Time: </span>
                 <span className="text-foreground">
                   {formatDateTime(record.approvalTime)}
                 </span>
-              </div>
-            </div>
+              </div>}
+            </div>}
           </div>
 
           {/* 管理員修改記錄 */}

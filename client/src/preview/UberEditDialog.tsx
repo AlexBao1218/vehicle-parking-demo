@@ -1,0 +1,14 @@
+import {useState} from 'react';
+import {Dialog,DialogContent,DialogHeader,DialogTitle,DialogDescription} from '@/components/ui/dialog';
+import {Input} from '@/components/ui/input';
+import {Button} from '@/components/ui/button';
+import {toast} from 'sonner';
+import {fields,useDemo,editUberRequest,type Request} from './store';
+export default function UberEditDialog({record,onClose,onSaved}:{record:Request;onClose:()=>void;onSaved:(r:Request)=>void}){
+ const s=useDemo();const u=record.uber!;const isNew=u.kind==='new';const current=s.users.find(x=>x.key===u.userKey&&x.company===u.company);const [values,setValues]=useState([...u.after]);const [error,setError]=useState('');
+ function submit(e:React.FormEvent){e.preventDefault();try{const updated=editUberRequest(record.id,values);onSaved(updated);onClose();toast.success('Pending request updated.')}catch(e){setError((e as Error).message)}}
+ return <Dialog open onOpenChange={v=>{if(!v)onClose()}}><DialogContent className="sm:max-w-3xl max-h-[90vh] overflow-y-auto"><DialogHeader><DialogTitle>Edit Uber request</DialogTitle><DialogDescription>{u.company} · {isNew?'New account — edit the requested user information below.':'Change user information — edit the requested values on the right. Current user information is read-only.'} Changes apply to user records only after approval.</DialogDescription></DialogHeader><form onSubmit={submit} className="space-y-4">
+ {!isNew&&<div className="hidden sm:grid grid-cols-[1fr_1.2fr_1.6fr] gap-4 text-xs font-medium text-muted-foreground"><span>Field</span><span>Current information · read-only</span><span>Requested value · editable</span></div>}
+ <div className={isNew?'grid sm:grid-cols-2 gap-5':'space-y-3'}>{fields.map((label,i)=>i===5||i===7?null:<div key={i} className={isNew?(i===4?'sm:col-span-2':''):'grid sm:grid-cols-[1fr_1.2fr_1.6fr] items-start gap-2 sm:gap-4 border-t pt-3'}><label htmlFor={`admin-uber-${i}`} className={`text-sm font-medium ${isNew?'block mb-2':'sm:pt-2'}`}>{label}{i<5?' *':''}</label>{!isNew&&<div className="rounded-md bg-accent/50 p-2 text-xs text-muted-foreground break-words"><span className="sm:hidden">Current (read-only): </span>{current?.values[i]||'Not provided'}</div>}<div><span className="sm:hidden text-xs text-muted-foreground">{!isNew?'Requested value (editable)':''}</span><Input id={`admin-uber-${i}`} aria-label={label} value={values[i]} required={i<5} placeholder={`Enter ${label.toLowerCase()}`} className="bg-card" onChange={e=>setValues(values.map((v,j)=>j===i?e.target.value:v))}/></div></div>)}</div>
+ {error&&<p role="alert" className="text-destructive text-sm">{error}</p>}<div className="flex justify-end gap-2 border-t pt-4"><Button type="button" variant="outline" onClick={onClose}>Cancel</Button><Button type="submit">Save changes</Button></div></form></DialogContent></Dialog>;
+}

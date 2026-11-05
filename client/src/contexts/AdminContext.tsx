@@ -24,12 +24,12 @@ const AdminContext = createContext<AdminContextValue>({
 export function AdminProvider({ children }: { children: ReactNode }) {
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [viewAsUser, setViewAsUser] = useState(false);
+  const [viewAsUser, setViewAsUser] = useState(()=>sessionStorage.getItem('demo:role')==='user');
   const [syncMode, setSyncMode] = useState<'test' | 'production'>('production');
   const [testVehicleLicenses, setTestVehicleLicenses] = useState<string[]>([]);
 
   const toggleViewAsUser = useCallback(() => {
-    setViewAsUser((prev) => !prev);
+    setViewAsUser((prev) => {sessionStorage.setItem('demo:role',prev?'admin':'user');return !prev;});
   }, []);
 
   useEffect(() => {

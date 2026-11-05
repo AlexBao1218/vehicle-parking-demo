@@ -1,0 +1,68 @@
+{
+  "Company A": {
+    "mainHeaders": [
+      "First Name",
+      "Last Name",
+      "Email Address",
+      "Employee ID",
+      "*Section\nCost Center1",
+      "*Section \nCost Center2",
+      "Section Head email address\n(Person for monthly billing review)",
+      "Status",
+      "Mobile Country Code",
+      "Mobile Number",
+      "Section",
+      "Department",
+      "Position ",
+      "Pls charge to \nG/L"
+    ],
+    "groupHeaders": [
+      "First Name",
+      "Last Name",
+      "Email Address",
+      "ID (Optional)",
+      "Group Name (Optional)",
+      "Reviewer Email (Optional)",
+      "Mobile Country Code",
+      "Mobile Number"
+    ],
+    "expenseHeaders": [
+      "Expense Code",
+      "Description (optional)",
+      "Emails (optional)"
+    ]
+  },
+  "Company B": {
+    "mainHeaders": [
+      "First Name",
+      "Last Name",
+      "Email Address",
+      "Employee ID",
+      "*Section\nCost Center1",
+      "*Section \nCost Center2",
+      "Section Head email address\n(Person for monthly billing review)",
+      "Status",
+      "Mobile Country Code",
+      "Mobile Number",
+      "Section",
+      "Department",
+      "Position ",
+      "Pls charge to \nG/L"
+    ],
+    "groupHeaders": [
+      "First Name",
+      "Last Name",
+      "Email Address",
+      "ID (Optional)",
+      "Group Name (Optional)",
+      "Reviewer Email (Optional)",
+      "Mobile Country Code",
+      "Mobile Number"
+    ],
+    "expenseHeaders": [
+      "Expense Code",
+      "Description (optional)",
+      "Emails (optional)"
+    ]
+  }
+}

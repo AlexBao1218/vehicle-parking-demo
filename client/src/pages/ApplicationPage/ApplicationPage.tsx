@@ -114,7 +114,7 @@ function isImageAttachment(att: AttachmentInfo): boolean {
   return att.type.startsWith('image/');
 }
 
-export default function ApplicationPage() {
+export default function ApplicationPage({embedded=false}:{embedded?:boolean}) {
   const profile = useCurrentUserProfile();
   const currentUserId = profile?.user_id ?? '';
 
@@ -734,7 +734,7 @@ export default function ApplicationPage() {
   };
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-8 md:px-6 md:py-12">
+    <div className={embedded ? undefined : "mx-auto max-w-7xl px-4 py-8 md:px-6 md:py-12"}>
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -836,7 +836,7 @@ export default function ApplicationPage() {
               <div className="space-y-2 md:w-1/2">
                  <Label htmlFor="changeType">Change Type *</Label>
                 <Select value={changeType} onValueChange={handleChangeTypeChange}>
-                  <SelectTrigger id="changeType" className="w-[391px]">
+                  <SelectTrigger id="changeType" className="w-full md:w-[391px]">
                     <SelectValue placeholder="Select change type" />
                   </SelectTrigger>
                   <SelectContent>
